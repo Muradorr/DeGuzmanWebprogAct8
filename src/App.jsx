@@ -1,40 +1,58 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-} from 'react-leaflet';
-import L from 'leaflet';
-
-import 'leaflet/dist/leaflet.css';
+  Container,
+  Row,
+  Col,
+  Form,
+  Table,
+  Navbar,
+  Button,
+  Card,
+  Badge,
+} from "react-bootstrap";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "leaflet/dist/leaflet.css";
 
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
-    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
   iconUrl:
-    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
   shadowUrl:
-    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
 function App() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [course, setCourse] = useState('');
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [course, setCourse] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const colors = {
+    page: "#020617",
+    card: "#0d121c",
+    dark: "#080c14",
+    input: "#020617",
+    border: "#1e293b",
+    inputBorder: "#334155",
+    cyan: "#22d3ee",
+    text: "#ffffff",
+    muted: "#94a3b8",
+    mutedDark: "#64748b",
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!firstName || !lastName || !course || !email || !address) {
-      alert('Please fill in all fields.');
+      alert("Please fill in all fields.");
       return;
     }
 
@@ -42,15 +60,13 @@ function App() {
 
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          address
-        )}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${address}`
       );
 
       const data = await response.json();
 
       if (data.length === 0) {
-        alert('Address not found. Please try a different address.');
+        alert("Address not found. Please try a different address.");
         return;
       }
 
@@ -69,14 +85,14 @@ function App() {
 
       setStudents((prev) => [...prev, newStudent]);
 
-      setFirstName('');
-      setLastName('');
-      setCourse('');
-      setEmail('');
-      setAddress('');
+      setFirstName("");
+      setLastName("");
+      setCourse("");
+      setEmail("");
+      setAddress("");
     } catch (error) {
       console.error(error);
-      alert('Something went wrong while fetching the location.');
+      alert("Something went wrong while fetching the location.");
     } finally {
       setLoading(false);
     }
@@ -86,508 +102,596 @@ function App() {
     setStudents(students.filter((student) => student.id !== id));
   };
 
+  const cardStyle = {
+    backgroundColor: colors.card,
+    border: `1px solid ${colors.border}`,
+    borderRadius: "14px",
+    overflow: "hidden",
+  };
+
+  const headerStyle = {
+    backgroundColor: colors.card,
+    borderBottom: `1px solid ${colors.border}`,
+    padding: "18px 22px",
+  };
+
+  const inputStyle = {
+    backgroundColor: colors.input,
+    border: `1px solid ${colors.inputBorder}`,
+    color: colors.text,
+    borderRadius: "8px",
+    padding: "11px 13px",
+    boxShadow: "none",
+  };
+
+  const labelStyle = {
+    color: colors.muted,
+    fontSize: "10px",
+    letterSpacing: "1.2px",
+    fontWeight: "700",
+    textTransform: "uppercase",
+  };
+
+  const tableCellStyle = {
+    backgroundColor: colors.card,
+    color: colors.muted,
+    borderColor: colors.border,
+    padding: "14px",
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-white font-sans selection:bg-cyan-500">
+    <div
+      style={{
+        backgroundColor: colors.page,
+        minHeight: "100vh",
+        color: colors.text,
+        fontFamily: "Arial, Helvetica, sans-serif",
+      }}
+    >
+      <Navbar
+        className="px-4 px-md-5 py-3 sticky-top"
+        style={{
+          backgroundColor: colors.page,
+          borderBottom: `1px solid ${colors.border}`,
+        }}
+      >
+        <Container fluid>
+          <Navbar.Brand>
+            <div
+              style={{
+                color: colors.cyan,
+                fontWeight: "900",
+                fontSize: "19px",
+                letterSpacing: "2px",
+              }}
+            >
+              STUDENT LOCATION SYSTEM
+            </div>
 
-      {/* NAVBAR */}
-      <nav className="flex justify-between items-center px-6 md:px-12 py-4 sticky top-0 z-50 bg-slate-950 border-b border-slate-800">
+            <div
+              style={{
+                color: colors.mutedDark,
+                fontSize: "9px",
+                letterSpacing: "1.4px",
+                textTransform: "uppercase",
+                marginTop: "4px",
+              }}
+            >
+              Register Students and View Their Locations
+            </div>
+          </Navbar.Brand>
 
-        <div>
-          <h1 className="text-lg md:text-xl font-black tracking-widest uppercase text-cyan-400">
-            Student Location System
+          <div
+            style={{
+              ...cardStyle,
+              padding: "8px 18px",
+              minWidth: "115px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                color: colors.mutedDark,
+                fontSize: "8px",
+                fontWeight: "700",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Total Students
+            </div>
+
+            <div
+              style={{
+                color: colors.cyan,
+                fontSize: "22px",
+                fontWeight: "900",
+              }}
+            >
+              {students.length}
+            </div>
+          </div>
+        </Container>
+      </Navbar>
+
+      <Container fluid className="px-4 px-md-5 py-4" style={{ maxWidth: "1500px" }}>
+        <div
+          className="mb-4"
+          style={{
+            ...cardStyle,
+            padding: "30px 32px",
+          }}
+        >
+          <div className="d-flex align-items-center mb-3">
+            <div
+              style={{
+                width: "5px",
+                height: "42px",
+                backgroundColor: colors.cyan,
+                borderRadius: "10px",
+                marginRight: "14px",
+              }}
+            />
+
+            <div>
+              <div
+                style={{
+                  color: colors.cyan,
+                  fontSize: "10px",
+                  fontWeight: "800",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                }}
+              >
+                INF232 • React Framework
+              </div>
+
+              <div
+                style={{
+                  color: colors.mutedDark,
+                  fontSize: "9px",
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Student Mapping Activity
+              </div>
+            </div>
+          </div>
+
+          <h1
+            style={{
+              fontSize: "clamp(30px, 4vw, 48px)",
+              fontWeight: "900",
+              textTransform: "uppercase",
+              marginBottom: "10px",
+            }}
+          >
+            Student Locations
           </h1>
 
-          <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-1">
-            Register Students and View Their Locations
+          <p
+            style={{
+              color: colors.muted,
+              fontSize: "13px",
+              maxWidth: "700px",
+              margin: 0,
+            }}
+          >
+            Register students, search their address, and display their locations
+            on an interactive map.
           </p>
         </div>
 
-        <div className="bg-[#0d121c] border border-slate-800 rounded-lg px-4 py-2">
-
-          <p className="text-[8px] uppercase tracking-widest text-slate-500">
-            Total Students
-          </p>
-
-          <p className="text-lg font-black text-cyan-400 text-center">
-            {students.length}
-          </p>
-
-        </div>
-
-      </nav>
-
-
-      {/* MAIN */}
-      <main className="flex-1 px-6 md:px-12 py-8 md:py-10 max-w-7xl w-full mx-auto">
-
-
-        {/* HEADER */}
-        <div className="w-full mb-8">
-
-          <div className="bg-[#0d121c] border border-slate-800 rounded-xl px-6 md:px-10 py-8">
-
-            <div className="flex items-center gap-3 mb-4">
-
-              <div className="w-2 h-10 bg-cyan-500 rounded-full"></div>
-
-              <div>
-
-                <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-                  INF232 • React Framework
-                </p>
-
-                <p className="text-slate-500 text-[9px] uppercase tracking-widest mt-1">
-                  Student Mapping Activity
-                </p>
-
-              </div>
-
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-black uppercase text-white">
-              Student Locations
-            </h2>
-
-            <p className="text-xs md:text-sm text-slate-400 mt-3 max-w-2xl leading-relaxed">
-              Register students, search their address, and display their
-              locations on an interactive map.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        {/* MAP + REGISTRATION */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
-
-
-          {/* MAP */}
-          <div className="lg:col-span-3 bg-[#0d121c] border border-slate-800 rounded-xl overflow-hidden">
-
-            <div className="px-5 py-4 border-b border-slate-800">
-
-              <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">
-                Student Location
-              </p>
-
-              <h3 className="text-base font-bold text-white mt-1">
-                Interactive Student Location Map
-              </h3>
-
-            </div>
-
-
-            <div className="p-4">
-
-              <div className="h-[500px] border border-slate-800 rounded-lg overflow-hidden">
-
-                <MapContainer
-                  center={[14.5995, 121.033]}
-                  zoom={11}
+        <Row className="g-4">
+          <Col lg={7}>
+            <Card className="h-100" style={cardStyle}>
+              <Card.Header style={headerStyle}>
+                <div
                   style={{
-                    height: '100%',
-                    width: '100%',
+                    color: colors.cyan,
+                    fontSize: "9px",
+                    letterSpacing: "1.7px",
+                    fontWeight: "800",
+                    textTransform: "uppercase",
                   }}
                 >
+                  Student Location
+                </div>
 
-                  <TileLayer
-                    attribution="&copy; OpenStreetMap contributors"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-
-
-                  {students.map((student) => (
-
-                    <Marker
-                      key={student.id}
-                      position={[
-                        student.latitude,
-                        student.longitude,
-                      ]}
-                    >
-
-                      <Popup>
-
-                        <div className="text-slate-900">
-
-                          <h3 className="font-bold uppercase">
-                            {student.firstName} {student.lastName}
-                          </h3>
-
-                          <p className="text-xs font-bold mt-1">
-                            {student.course}
-                          </p>
-
-                          <p className="text-xs mt-2">
-                            <strong>Email:</strong> {student.email}
-                          </p>
-
-                          <p className="text-xs">
-                            <strong>Address:</strong>{' '}
-                            {student.originalAddress}
-                          </p>
-
-                          <p className="text-xs">
-                            <strong>Coordinates:</strong>{' '}
-                            {student.latitude.toFixed(4)},{' '}
-                            {student.longitude.toFixed(4)}
-                          </p>
-
-                        </div>
-
-                      </Popup>
-
-                    </Marker>
-
-                  ))}
-
-                </MapContainer>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          {/* FORM */}
-          <div className="lg:col-span-2 bg-[#0d121c] border border-slate-800 rounded-xl overflow-hidden">
-
-            <div className="px-5 py-4 border-b border-slate-800">
-
-              <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">
-                Registration
-              </p>
-
-              <h3 className="text-base font-bold text-white mt-1">
-                Student Registration
-              </h3>
-
-            </div>
-
-
-            <form
-              onSubmit={handleSubmit}
-              className="p-5"
-            >
-
-
-              {/* FIRST NAME */}
-              <div className="mb-4">
-
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                  First Name
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter first name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 transition"
-                />
-
-              </div>
-
-
-              {/* LAST NAME */}
-              <div className="mb-4">
-
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                  Last Name
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 transition"
-                />
-
-              </div>
-
-
-              {/* COURSE */}
-              <div className="mb-4">
-
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                  Course
-                </label>
-
-                <select
-                  value={course}
-                  onChange={(e) => setCourse(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-cyan-500 transition"
+                <div
+                  style={{
+                    color: colors.text,
+                    fontSize: "16px",
+                    fontWeight: "700",
+                  }}
                 >
+                  Interactive Student Location Map
+                </div>
+              </Card.Header>
 
-                  <option value="">
-                    Select Course
-                  </option>
+              <Card.Body className="p-3">
+                <div
+                  style={{
+                    height: "520px",
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <MapContainer
+                    center={[14.5995, 121.033]}
+                    zoom={11}
+                    style={{ height: "100%", width: "100%" }}
+                  >
+                    <TileLayer
+                      attribution="&copy; OpenStreetMap contributors"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
 
-                  <option value="BSCS">
-                    BSCS
-                  </option>
+                    {students.map((student) => (
+                      <Marker
+                        key={student.id}
+                        position={[student.latitude, student.longitude]}
+                      >
+                        <Popup>
+                          <div style={{ color: "#0f172a" }}>
+                            <h6
+                              style={{
+                                fontWeight: "800",
+                                textTransform: "uppercase",
+                                marginBottom: "3px",
+                              }}
+                            >
+                              {student.firstName} {student.lastName}
+                            </h6>
 
-                  <option value="BSIT">
-                    BSIT
-                  </option>
+                            <p
+                              style={{
+                                color: "#0891b2",
+                                fontSize: "11px",
+                                fontWeight: "800",
+                                marginBottom: "8px",
+                              }}
+                            >
+                              {student.course}
+                            </p>
 
-                  <option value="BSIS">
-                    BSIS
-                  </option>
+                            <p style={{ fontSize: "12px", marginBottom: "4px" }}>
+                              <strong>Email:</strong> {student.email}
+                            </p>
 
-                  <option value="BSCpE">
-                    BSCpE
-                  </option>
+                            <p style={{ fontSize: "12px", marginBottom: "4px" }}>
+                              <strong>Address:</strong> {student.originalAddress}
+                            </p>
 
-                </select>
+                            <p style={{ fontSize: "12px", margin: 0 }}>
+                              <strong>Coordinates:</strong>{" "}
+                              {student.latitude.toFixed(4)},{" "}
+                              {student.longitude.toFixed(4)}
+                            </p>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    ))}
+                  </MapContainer>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
 
-              </div>
+          <Col lg={5}>
+            <Card style={cardStyle}>
+              <Card.Header style={headerStyle}>
+                <div
+                  style={{
+                    color: colors.cyan,
+                    fontSize: "9px",
+                    letterSpacing: "1.7px",
+                    fontWeight: "800",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Registration
+                </div>
 
+                <div
+                  style={{
+                    color: colors.text,
+                    fontSize: "16px",
+                    fontWeight: "700",
+                  }}
+                >
+                  Student Registration
+                </div>
+              </Card.Header>
 
-              {/* EMAIL */}
-              <div className="mb-4">
+              <Card.Body className="p-4">
+                <Form onSubmit={handleSubmit}>
+                  <Form.Group className="mb-3">
+                    <Form.Label style={labelStyle}>First Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </Form.Group>
 
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                  Email
-                </label>
+                  <Form.Group className="mb-3">
+                    <Form.Label style={labelStyle}>Last Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Enter last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </Form.Group>
 
-                <input
-                  type="email"
-                  placeholder="student@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 transition"
-                />
-
-              </div>
-
-
-              {/* ADDRESS */}
-              <div className="mb-5">
-
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
-                  Address
-                </label>
-
-                <textarea
-                  rows="3"
-                  placeholder="Example: Pasay City, Philippines"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full resize-none bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-cyan-500 transition"
-                />
-
-              </div>
-
-
-              {/* BUTTON */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-cyan-500 text-slate-950 rounded-lg py-3 text-xs font-black uppercase tracking-wider hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-
-                {loading
-                  ? 'Registering...'
-                  : 'Register Student'}
-
-              </button>
-
-            </form>
-
-          </div>
-
-        </div>
-
-
-        {/* STUDENT ROSTER */}
-        <div className="bg-[#0d121c] border border-slate-800 rounded-xl overflow-hidden">
-
-          <div className="px-5 py-4 border-b border-slate-800">
-
-            <p className="text-cyan-400 text-[10px] font-bold uppercase tracking-widest">
-              Student Records
-            </p>
-
-            <h3 className="text-base font-bold text-white mt-1">
-              Registered Roster
-            </h3>
-
-          </div>
-
-
-          <div className="overflow-x-auto">
-
-            <table className="w-full text-left">
-
-              <thead>
-
-                <tr className="border-b border-slate-800 text-[9px] uppercase tracking-widest text-slate-500">
-
-                  <th className="px-5 py-4">
-                    #
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Student
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Course
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Email
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Address
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Coordinates
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Action
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-                {students.length === 0 ? (
-
-                  <tr>
-
-                    <td
-                      colSpan="7"
-                      className="px-5 py-10 text-center text-xs uppercase tracking-widest text-slate-600"
+                  <Form.Group className="mb-3">
+                    <Form.Label style={labelStyle}>Course</Form.Label>
+                    <Form.Select
+                      value={course}
+                      onChange={(e) => setCourse(e.target.value)}
+                      style={inputStyle}
                     >
-                      No Students Found in Database
-                    </td>
+                      <option value="">Select Course</option>
+                      <option value="BSCS">BSCS</option>
+                      <option value="BSIT">BSIT</option>
+                      <option value="BSIS">BSIS</option>
+                      <option value="BSCpE">BSCpE</option>
+                    </Form.Select>
+                  </Form.Group>
 
-                  </tr>
+                  <Form.Group className="mb-3">
+                    <Form.Label style={labelStyle}>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="student@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </Form.Group>
 
-                ) : (
+                  <Form.Group className="mb-4">
+                    <Form.Label style={labelStyle}>Address</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder="Example: Pasay City, Philippines"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      style={{
+                        ...inputStyle,
+                        resize: "none",
+                      }}
+                    />
+                  </Form.Group>
 
-                  students.map((student, index) => (
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-100 border-0"
+                    style={{
+                      backgroundColor: colors.cyan,
+                      color: colors.page,
+                      fontWeight: "900",
+                      fontSize: "11px",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                      padding: "13px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    {loading ? "Transmitting..." : "Initialize Registration"}
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-                    <tr
-                      key={student.id}
-                      className="border-b border-slate-800/70 text-xs text-slate-400 hover:bg-slate-900/40 transition"
-                    >
+        <Row className="mt-4">
+          <Col>
+            <Card style={cardStyle}>
+              <Card.Header style={headerStyle}>
+                <div
+                  style={{
+                    color: colors.cyan,
+                    fontSize: "9px",
+                    letterSpacing: "1.7px",
+                    fontWeight: "800",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Student Records
+                </div>
 
-                      <td className="px-5 py-4 text-slate-500">
-                        {index + 1}
-                      </td>
+                <div
+                  style={{
+                    color: colors.text,
+                    fontSize: "16px",
+                    fontWeight: "700",
+                  }}
+                >
+                  Registered Roster
+                </div>
+              </Card.Header>
 
-
-                      <td className="px-5 py-4 font-bold text-white uppercase">
-                        {student.firstName} {student.lastName}
-                      </td>
-
-
-                      <td className="px-5 py-4">
-
-                        <span className="inline-block bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-md px-2 py-1 text-[9px] font-bold">
-                          {student.course}
-                        </span>
-
-                      </td>
-
-
-                      <td className="px-5 py-4">
-                        {student.email}
-                      </td>
-
-
-                      <td className="px-5 py-4">
-                        {student.originalAddress}
-                      </td>
-
-
-                      <td className="px-5 py-4 font-mono text-[10px]">
-
-                        <div>
-                          LAT: {student.latitude.toFixed(5)}
-                        </div>
-
-                        <div>
-                          LNG: {student.longitude.toFixed(5)}
-                        </div>
-
-                      </td>
-
-
-                      <td className="px-5 py-4">
-
-                        <button
-                          onClick={() => handleDelete(student.id)}
-                          className="border border-cyan-500/40 text-cyan-400 px-3 py-1.5 rounded-md text-[9px] font-bold uppercase hover:bg-cyan-500 hover:text-slate-950 transition"
+              <Card.Body className="p-0">
+                <Table responsive hover className="m-0 align-middle">
+                  <thead>
+                    <tr>
+                      {[
+                        "#",
+                        "Student",
+                        "Course",
+                        "Email",
+                        "Address",
+                        "Coordinates",
+                        "Action",
+                      ].map((heading) => (
+                        <th
+                          key={heading}
+                          style={{
+                            backgroundColor: colors.dark,
+                            color: colors.muted,
+                            borderColor: colors.border,
+                            fontSize: "10px",
+                            letterSpacing: "1px",
+                            textTransform: "uppercase",
+                            padding: "14px",
+                          }}
                         >
-                          Delete
-                        </button>
-
-                      </td>
-
+                          {heading}
+                        </th>
+                      ))}
                     </tr>
+                  </thead>
 
-                  ))
+                  <tbody>
+                    {students.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="7"
+                          style={{
+                            ...tableCellStyle,
+                            color: colors.mutedDark,
+                            textAlign: "center",
+                            padding: "45px",
+                            fontSize: "11px",
+                            fontWeight: "700",
+                            textTransform: "uppercase",
+                            letterSpacing: "1.5px",
+                          }}
+                        >
+                          No Personnel Found in Database
+                        </td>
+                      </tr>
+                    ) : (
+                      students.map((student, index) => (
+                        <tr key={student.id}>
+                          <td style={tableCellStyle}>{index + 1}</td>
 
-                )}
+                          <td
+                            style={{
+                              ...tableCellStyle,
+                              color: colors.text,
+                              fontWeight: "700",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {student.firstName} {student.lastName}
+                          </td>
 
-              </tbody>
+                          <td style={tableCellStyle}>
+                            <Badge
+                              style={{
+                                backgroundColor: "rgba(34,211,238,.10)",
+                                color: colors.cyan,
+                                border: "1px solid rgba(34,211,238,.30)",
+                              }}
+                            >
+                              {student.course}
+                            </Badge>
+                          </td>
 
-            </table>
+                          <td style={tableCellStyle}>{student.email}</td>
 
-          </div>
+                          <td style={tableCellStyle}>
+                            {student.originalAddress}
+                          </td>
 
-        </div>
+                          <td
+                            style={{
+                              ...tableCellStyle,
+                              fontFamily: "monospace",
+                              fontSize: "11px",
+                            }}
+                          >
+                            <div>LAT: {student.latitude.toFixed(5)}</div>
+                            <div>LNG: {student.longitude.toFixed(5)}</div>
+                          </td>
 
-      </main>
+                          <td style={tableCellStyle}>
+                            <Button
+                              size="sm"
+                              onClick={() => handleDelete(student.id)}
+                              style={{
+                                backgroundColor: "transparent",
+                                color: colors.cyan,
+                                border: `1px solid ${colors.cyan}`,
+                                fontSize: "9px",
+                                fontWeight: "800",
+                                textTransform: "uppercase",
+                                borderRadius: "6px",
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
 
+      <footer
+        style={{
+          backgroundColor: colors.dark,
+          borderTop: `1px solid ${colors.border}`,
+          marginTop: "40px",
+          padding: "22px 30px",
+        }}
+      >
+        <Container
+          fluid
+          className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
+          style={{ maxWidth: "1500px" }}
+        >
+          <div>
+            <div
+              style={{
+                color: colors.cyan,
+                fontSize: "11px",
+                fontWeight: "800",
+                letterSpacing: "1.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Dan Lawrence Fabia
+            </div>
 
-      {/* FOOTER */}
-      <footer className="border-t border-slate-800 bg-[#080c14] px-6 md:px-12 py-6">
-
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
-
-          <div className="text-center md:text-left">
-
-            <p className="text-cyan-400 text-xs font-bold uppercase tracking-widest">
-              DJ DE GUZMAN
-            </p>
-
-            <p className="text-[9px] text-slate-600 uppercase tracking-widest mt-1">
+            <div
+              style={{
+                color: colors.mutedDark,
+                fontSize: "8px",
+                textTransform: "uppercase",
+              }}
+            >
               Student Location System
-            </p>
-
+            </div>
           </div>
 
-
-          <div className="text-center md:text-right">
-
-            <p className="text-[9px] text-slate-600 uppercase tracking-widest">
-              INF232 • Web Development
-            </p>
-
-            <p className="text-[9px] text-slate-700 mt-1">
-              React • Leaflet • OpenStreetMap
-            </p>
-
+          <div
+            style={{
+              color: colors.mutedDark,
+              fontSize: "9px",
+              textTransform: "uppercase",
+            }}
+          >
+            INF232 • Web Development
           </div>
-
-        </div>
-
+        </Container>
       </footer>
-
     </div>
   );
 }
